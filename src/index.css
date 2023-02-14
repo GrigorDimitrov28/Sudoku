@@ -11,3 +11,41 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+.App {
+  height: 100vh;
+  width: 100vw;
+  background-color: aliceblue;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.cell {
+  height: 50px;
+  width: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  caret-color: transparent;
+  border: 1px solid black;
+  font-weight: 600;
+  font-size: 30px;
+}
+
+.cell:hover {
+  cursor: default;
+}
+
+.selected {
+  background-color: rgb(96, 186, 216);
+}
+
+.row {
+  display: flex;
+}
+
+.highlighted {
+  background-color: lightblue;
+}
