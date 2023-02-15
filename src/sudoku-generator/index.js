@@ -1,7 +1,11 @@
 import generator from 'sudoku';
 
 const generateSudoku = () => {
-    const generated = generator.makepuzzle().map(item => {
+    let newSudoku = generator.makepuzzle();
+    let solution = generator.solvepuzzle(newSudoku).map(num => num + 1);
+
+
+    const generated = newSudoku.map(item => {
         if(item != null) return item + 1;
         else return null;
     }).reduce((resultArray, item, index) => {
@@ -16,7 +20,7 @@ const generateSudoku = () => {
         return resultArray;
     }, []);
 
-    return generated;
+    return [generated, solution];
 }
 
 export default generateSudoku;
