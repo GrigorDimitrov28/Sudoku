@@ -1,25 +1,11 @@
-import generator from 'sudoku';
+const generateSudoku = (difficulty) => {
+    const newSudokuString = Window.sudoku.generate(difficulty);
+    const solutionString = Window.sudoku.solve(newSudokuString);
 
-const generateSudoku = () => {
-    let newSudoku = generator.makepuzzle();
-    let solution = generator.solvepuzzle(newSudoku).map(num => num + 1);
+    const board = Window.sudoku.board_string_to_grid(newSudokuString);
+    const solution = solutionString.split("");
 
-    const generated = newSudoku.map(item => {
-        if(item != null) return item + 1;
-        else return null;
-    }).reduce((resultArray, item, index) => {
-        const chunkIndex = Math.floor(index/9);
-
-        if(!resultArray[chunkIndex]){
-            resultArray[chunkIndex] = [];
-        }
-
-        resultArray[chunkIndex].push(item);
-
-        return resultArray;
-    }, []);
-
-    return [generated, solution];
+    return [board, solution];
 }
 
 export default generateSudoku;

@@ -12,8 +12,8 @@ code {
     monospace;
 }
  
-.App {
-  height: 100vh;
+.board {
+  height: 90vh;
   width: 100vw;
   display: flex;
   flex-direction: column;
@@ -30,7 +30,7 @@ code {
   caret-color: transparent;
   font-weight: 600;
   font-size: 30px;
-  color: rgb(38, 0, 255);
+  color: rgb(0, 102, 255);
   border: 1px solid black;
 }
  
