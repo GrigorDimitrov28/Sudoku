@@ -4,7 +4,6 @@ const generateSudoku = () => {
     let newSudoku = generator.makepuzzle();
     let solution = generator.solvepuzzle(newSudoku).map(num => num + 1);
 
-
     const generated = newSudoku.map(item => {
         if(item != null) return item + 1;
         else return null;

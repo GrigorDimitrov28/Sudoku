@@ -17,11 +17,8 @@ const squareTiles = {
 const [board, solution] = generateSudoku();
 
 /* 
---> Fix navigation from default digit cells
 --> Fix highlighting when entering a new value
---> Add option to choose difficulty
 --> Add popup when solved
---> Fix console.log errors when out of bounds
 */
  
 function Cell (props) {
@@ -29,9 +26,9 @@ function Cell (props) {
   let activeValue = props.selected ? parseInt(document.getElementById(props.selected).textContent) : 0;
  
   function handleKeyDown(e) {
-    if(e.keyCode >= 49 && e.keyCode <= 57) {
+    if(!e.target.className.includes("default") && e.keyCode >= 49 && e.keyCode <= 57) {
       setValue(String.fromCharCode(e.keyCode));
-    }else if(e.keyCode == 8){
+    }else if(!e.target.className.includes("default") && e.keyCode == 8){
       setValue(null);
     }
   }
@@ -43,7 +40,7 @@ function Cell (props) {
   if(props.id != props.selected && props.activeSquare.includes(props.id)) className += " highlighted";
  
   return (
-    <div id={props.id} tabIndex={props.value ? null : "0"} className={className} maxLength="1" onKeyDown={(e)=> {
+    <div id={props.id} tabIndex="0" className={className} maxLength="1" onKeyDown={(e)=> {
       handleKeyDown(e);
     }}> 
       {value}
@@ -57,7 +54,7 @@ function Row (props) {
   const rowContent = props.content;
  
   const cells = rowContent.map((cell, cellIndex) => {
-    return <Cell activeSquare={props.activeSquare} value={cell} id={startNum+cellIndex+1} selected={selected} />
+    return <Cell key={cellIndex} activeSquare={props.activeSquare} value={cell} id={startNum+cellIndex+1} selected={selected} />
   })
  
   return (
@@ -75,23 +72,23 @@ function App() {
   const activeSquare = selectedIndex ? Object.values(squareTiles).filter(value => value.includes(selectedIndex))[0] : [];
  
   const rows = board.map((row, rowIndex) => {
-    return <Row activeSquare={activeSquare} number={rowIndex} selectedIndex={selectedIndex} content={row}/>
+    return <Row key={rowIndex} activeSquare={activeSquare} number={rowIndex} selectedIndex={selectedIndex} content={row}/>
   })
  
   function navigate(e) {
-    if(e.keyCode == 39){
+    if(e.keyCode == 39 && selectedIndex < 81){
       document.getElementById(selectedIndex + 1).focus();
       setSelected(selectedIndex + 1);
     }
-    else if(e.keyCode == 37){
+    else if(e.keyCode == 37 && selectedIndex > 1){
       document.getElementById(selectedIndex - 1).focus();
       setSelected(selectedIndex - 1);
     }
-    else if(e.keyCode == 38){
+    else if(e.keyCode == 38 && (selectedIndex - 9) > 1){
       document.getElementById(selectedIndex - 9).focus();
       setSelected(selectedIndex - 9);
     }
-    else if(e.keyCode == 40){
+    else if(e.keyCode == 40 && (selectedIndex + 9) < 81){
       document.getElementById(selectedIndex + 9).focus();
       setSelected(selectedIndex + 9);
     }
