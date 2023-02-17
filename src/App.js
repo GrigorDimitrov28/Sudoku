@@ -1,6 +1,7 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useContext, createContext} from 'react';
 import './App.css';
 import generateSudoku from './sudoku-generator';
+import uuid from 'react-uuid';
  
 const squareTiles = {
   1: [1, 2, 3, 10, 11, 12, 19, 20, 21],
@@ -14,39 +15,79 @@ const squareTiles = {
   9: [61, 62, 63, 70, 71, 72, 79, 80, 81]
 }
 
-
 /* 
+--> Fix navigation through cells with the keys
 --> Fix highlighting when entering a new value
 --> Add popup when solved
 --> Pass only the correct value to a cell, not the whole solution
 */
  
-function Cell (props) {
+function Cell(props) {
   const solution = props.solution;
   const [value, setValue] = useState(props.value);
-  let activeValue = props.selected ? parseInt(document.getElementById(props.selected).textContent) : 0;
- 
+  const [activeValue, setActiveValue] = useState(0);
+
   function handleKeyDown(e) {
-    if(!e.target.className.includes("default") && e.keyCode >= 49 && e.keyCode <= 57) {
+    console.log("Handle key");
+    if (
+      !e.target.className.includes("default") &&
+      e.keyCode >= 49 &&
+      e.keyCode <= 57
+    ) {
       setValue(String.fromCharCode(e.keyCode));
-    }else if(!e.target.className.includes("default") && e.keyCode === 8){
+    } else if (
+      !e.target.className.includes("default") &&
+      e.keyCode === 8
+    ) {
       setValue(null);
     }
   }
- 
-  let className = props.id === props.selected ? "selected cell" : (props.selected && (Math.abs(props.id - props.selected) % 9 === 0) ? "highlighted cell" : "cell")
-  if(props.value) className += " default";
-  if(activeValue === value) className += " eqDigit";
-  if(solution[props.id - 1] !== value) className += " wrong";
-  if(props.id !== props.selected && props.activeSquare.includes(props.id)) className += " highlighted";
- 
+
+  useEffect(() => {
+    if (props.newGame) {
+      const element = document.getElementById(props.id);
+      element.className = "cell";
+    }
+  }, [props.newGame]);
+
+  useEffect(() => {
+    setValue(props.value);
+  }, [props.value])
+
+  useEffect(() => {
+    setActiveValue(
+      props.selected
+        ? parseInt(document.getElementById(props.selected).textContent)
+        : 0
+    );
+  }, [props.selected]);
+
+  let className =
+    props.id === props.selected
+      ? "selected cell"
+      : props.selected && Math.abs(props.id - props.selected) % 9 === 0
+      ? "highlighted cell"
+      : "cell";
+
+  if (props.value) className += " default";
+  if (activeValue === value) className += " eqDigit";
+  if (solution[props.id - 1] !== value) className += " wrong";
+  if (props.id !== props.selected && props.activeSquare.includes(props.id))
+    className += " highlighted";
+  
   return (
-    <div id={props.id} tabIndex="0" className={className} maxLength="1" onKeyDown={(e)=> {
-      handleKeyDown(e);
-    }}> 
+    <div
+      key={props.id - props.value}
+      id={props.id}
+      tabIndex="0"
+      className={className}
+      onKeyDown={(e) => {
+        handleKeyDown(e);
+      }}
+    >
       {value}
     </div>
-  )
+  );
 }
  
 function Row (props) {
@@ -54,12 +95,12 @@ function Row (props) {
   const selected = props.selectedIndex;
   const rowContent = props.content;
  
-  let cells = rowContent.map((cell, cellIndex) => {
-    return <Cell  solution={props.solution} activeSquare={props.activeSquare} value={cell === "." ? null : cell} id={startNum+cellIndex+1} selected={selected} />
+  const cells = rowContent.map((cell, cellIndex) => {
+    return <Cell solution={props.solution} activeSquare={props.activeSquare} value={cell === "." ? null : cell} id={startNum+cellIndex+1} selected={selected} />
   })
  
   return (
-    <div className={
+    <div  className={
       selected && selected > startNum && selected <= startNum + 9 ? "highlighted row" : "row"
     }>
       {cells}
@@ -70,18 +111,18 @@ function Row (props) {
 function Board (props) {
   const [selectedIndex, setSelected] = useState(null);
   const activeSquare = selectedIndex ? Object.values(squareTiles).filter(value => value.includes(selectedIndex))[0] : [];
- 
 
   let rows = props.board.map((row, rowIndex) => {
     return <Row  solution={props.solution} activeSquare={activeSquare} number={rowIndex} selectedIndex={selectedIndex} content={row}/>
   })
 
   useEffect(() => {
-
+    document.getElementsByClassName("cell").className="cell";
     setSelected(null);
   }, [props.board])
-  
+
   function navigate(e) {
+    console.log(e.target.id);
     if(e.keyCode === 39 && selectedIndex < 81){
       document.getElementById(selectedIndex + 1).focus();
       setSelected(selectedIndex + 1);
@@ -112,7 +153,7 @@ function Board (props) {
 function App() {
   
   const[[board,solution], setGame] = useState(generateSudoku("easy"));
- 
+
   return (
     <div className="wrapper">
       <Board board={board} solution={solution}/>
