@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import './App.css';
 import generateSudoku from './sudoku-generator';
  
-const squareTiles = {
+
+//Cell IDs for every square on the board
+const SQUARE_TILES = {
   1: [1, 2, 3, 10, 11, 12, 19, 20, 21],
   2: [4, 5, 6, 13, 14, 15, 22, 23, 24],
   3: [7, 8, 9, 16, 17, 18, 25, 26, 27],
@@ -14,11 +16,9 @@ const squareTiles = {
   9: [61, 62, 63, 70, 71, 72, 79, 80, 81]
 }
 
-/* 
---> Fix navigation through cells with the keys
---> Fix highlighting when entering a new value
---> Add popup when solved
+/* TODO
 --> Pass only the correct value to a cell, not the whole solution
+--> Refactor and split code
 */
  
 function Cell(props) {
@@ -48,6 +48,10 @@ function Cell(props) {
       props.changeActiveValue(null);
     }
   }
+
+  useEffect(() => {
+    if(!className.includes("default")) setValue(null);
+  }, [props.gameCounter])
 
   useEffect(() => {
     setValue(props.value);
@@ -91,6 +95,7 @@ function Row (props) {
  
   const cells = rowContent.map((cell, cellIndex) => {
     return <Cell 
+    gameCounter={props.gameCounter}
     activeValue={props.activeValue}
     changeActiveValue={props.changeActiveValue}
     solution={props.solution} 
@@ -111,8 +116,9 @@ function Row (props) {
 
 function Board (props) {
   const [selectedIndex, setSelected] = useState(null);
-  const activeSquare = selectedIndex ? Object.values(squareTiles).filter(value => value.includes(selectedIndex))[0] : [];
+  const activeSquare = selectedIndex ? Object.values(SQUARE_TILES).filter(value => value.includes(selectedIndex))[0] : [];
   const [activeValue, setActiveValue] = useState(0);
+  const [gameCounter, setGameCounter] = useState(0);
 
   function changeActiveValue(value) {
     setActiveValue(value)
@@ -121,6 +127,7 @@ function Board (props) {
 
   let rows = props.board.map((row, rowIndex) => {
     return <Row 
+    gameCounter={gameCounter}
     activeValue={activeValue}
     changeActiveValue={changeActiveValue}
     solution={props.solution} 
@@ -131,24 +138,32 @@ function Board (props) {
   })
 
   useEffect(() => {
-    document.getElementsByClassName("cell").className="cell";
+    const cells = document.getElementsByClassName("cell");
+    
+    for(const cell of cells) {
+      cell.classList.remove("wrong");
+      cell.classList.remove("eqDigit");
+    }
+
     setSelected(null);
+    setGameCounter(gameCounter + 1);
+    setActiveValue(0);
   }, [props.board])
 
   function navigate(e) {
-    if(e.keyCode === 39 && selectedIndex < 81){
+    if((e.keyCode === 39 || e.keyCode === 68) && selectedIndex < 81){
       document.getElementById(selectedIndex + 1).focus();
       setSelected(selectedIndex + 1);
     }
-    else if(e.keyCode === 37 && selectedIndex > 1){
+    else if((e.keyCode === 37 || e.keyCode === 65) && selectedIndex > 1){
       document.getElementById(selectedIndex - 1).focus();
       setSelected(selectedIndex - 1);
     }
-    else if(e.keyCode === 38 && (selectedIndex - 9) > 0){
+    else if((e.keyCode === 38 || e.keyCode === 87) && (selectedIndex - 9) > 0){
       document.getElementById(selectedIndex - 9).focus();
       setSelected(selectedIndex - 9);
     }
-    else if(e.keyCode === 40 && (selectedIndex + 9) < 82){
+    else if((e.keyCode === 40 || e.keyCode === 83) && (selectedIndex + 9) < 82){
       document.getElementById(selectedIndex + 9).focus();
       setSelected(selectedIndex + 9);
     }
@@ -169,13 +184,16 @@ function App() {
 
   return (
     <div className="wrapper">
+      <h1>Sudoku.js</h1>
       <Board board={board} solution={solution}/>
-      <button onClick={() => setGame(generateSudoku("easy"))}>Easy</button>
-      <button onClick={() => setGame(generateSudoku("medium"))}>Medium</button>
-      <button onClick={() => setGame(generateSudoku("hard"))}>Hard</button>
-      <button onClick={() => setGame(generateSudoku("very-hard"))}>Very hard</button>
-      <button onClick={() => setGame(generateSudoku("insane"))}>Insane</button>
-      <button onClick={() => setGame(generateSudoku("inhuman"))}>Inhuman</button>
+      <div className="button-container">
+        <button onClick={() => setGame(generateSudoku("easy"))}>Easy</button>
+        <button onClick={() => setGame(generateSudoku("medium"))}>Medium</button>
+        <button onClick={() => setGame(generateSudoku("hard"))}>Hard</button>
+        <button onClick={() => setGame(generateSudoku("very-hard"))}>Very hard</button>
+        <button onClick={() => setGame(generateSudoku("insane"))}>Insane</button>
+        <button onClick={() => setGame(generateSudoku("inhuman"))}>Inhuman</button>
+      </div>
     </div>
   );
 }

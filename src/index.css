@@ -11,6 +11,16 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+.wrapper {
+  position: relative;
+}
+
+.wrapper h1 {
+  position: absolute;
+  left: 1em;
+  font-size: 3vh;
+}
  
 .board {
   height: 90vh;
@@ -85,3 +95,28 @@ code {
 .wrong {
   color: red;
 }
+
+.button-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.button-container button {
+  margin: 0 1em;
+  height: 50px;
+  width: 100px;
+  border-radius: 10px;
+  border: none;
+  color: white;
+  background-color: dodgerblue;
+  -webkit-box-shadow: 2px 3px 5px -1px rgba(0,0,0,0.75);
+-moz-box-shadow: 2px 3px 5px -1px rgba(0,0,0,0.75);
+box-shadow: 2px 3px 5px -1px rgba(0,0,0,0.75);
+}
+
+.button-container button:hover {
+  opacity: 0.8;
+  cursor: pointer;
+}
+
