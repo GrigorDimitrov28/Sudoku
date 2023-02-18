@@ -1,7 +1,6 @@
-import React, {useState, useEffect, useContext, createContext} from 'react';
+import React, { useState, useEffect } from 'react';
 import './App.css';
 import generateSudoku from './sudoku-generator';
-import uuid from 'react-uuid';
  
 const squareTiles = {
   1: [1, 2, 3, 10, 11, 12, 19, 20, 21],
@@ -25,42 +24,6 @@ const squareTiles = {
 function Cell(props) {
   const solution = props.solution;
   const [value, setValue] = useState(props.value);
-  const [activeValue, setActiveValue] = useState(0);
-
-  function handleKeyDown(e) {
-    console.log("Handle key");
-    if (
-      !e.target.className.includes("default") &&
-      e.keyCode >= 49 &&
-      e.keyCode <= 57
-    ) {
-      setValue(String.fromCharCode(e.keyCode));
-    } else if (
-      !e.target.className.includes("default") &&
-      e.keyCode === 8
-    ) {
-      setValue(null);
-    }
-  }
-
-  useEffect(() => {
-    if (props.newGame) {
-      const element = document.getElementById(props.id);
-      element.className = "cell";
-    }
-  }, [props.newGame]);
-
-  useEffect(() => {
-    setValue(props.value);
-  }, [props.value])
-
-  useEffect(() => {
-    setActiveValue(
-      props.selected
-        ? parseInt(document.getElementById(props.selected).textContent)
-        : 0
-    );
-  }, [props.selected]);
 
   let className =
     props.id === props.selected
@@ -69,8 +32,39 @@ function Cell(props) {
       ? "highlighted cell"
       : "cell";
 
+  function handleKeyDown(e) {
+    if (
+      !e.target.className.includes("default") &&
+      e.keyCode >= 49 &&
+      e.keyCode <= 57
+    ) {
+      setValue(String.fromCharCode(e.keyCode));
+      props.changeActiveValue(parseInt(String.fromCharCode(e.keyCode)));
+    } else if (
+      !e.target.className.includes("default") &&
+      e.keyCode === 8
+    ) {
+      setValue(null);
+      props.changeActiveValue(null);
+    }
+  }
+
+  useEffect(() => {
+    setValue(props.value);
+    props.changeActiveValue(value);
+  }, [props.value])
+
+  useEffect(() => {
+    props.changeActiveValue(
+      props.selected
+        ? parseInt(document.getElementById(props.selected).textContent)
+        : 0
+    );
+  }, [props.selected]);
+
+  
+  if (props.activeValue && value == props.activeValue) className += " eqDigit";
   if (props.value) className += " default";
-  if (activeValue === value) className += " eqDigit";
   if (solution[props.id - 1] !== value) className += " wrong";
   if (props.id !== props.selected && props.activeSquare.includes(props.id))
     className += " highlighted";
@@ -96,7 +90,14 @@ function Row (props) {
   const rowContent = props.content;
  
   const cells = rowContent.map((cell, cellIndex) => {
-    return <Cell solution={props.solution} activeSquare={props.activeSquare} value={cell === "." ? null : cell} id={startNum+cellIndex+1} selected={selected} />
+    return <Cell 
+    activeValue={props.activeValue}
+    changeActiveValue={props.changeActiveValue}
+    solution={props.solution} 
+    activeSquare={props.activeSquare} 
+    value={cell === "." ? null : cell} 
+    id={startNum+cellIndex+1} 
+    selected={selected} />
   })
  
   return (
@@ -111,9 +112,22 @@ function Row (props) {
 function Board (props) {
   const [selectedIndex, setSelected] = useState(null);
   const activeSquare = selectedIndex ? Object.values(squareTiles).filter(value => value.includes(selectedIndex))[0] : [];
+  const [activeValue, setActiveValue] = useState(0);
+
+  function changeActiveValue(value) {
+    setActiveValue(value)
+  }
+
 
   let rows = props.board.map((row, rowIndex) => {
-    return <Row  solution={props.solution} activeSquare={activeSquare} number={rowIndex} selectedIndex={selectedIndex} content={row}/>
+    return <Row 
+    activeValue={activeValue}
+    changeActiveValue={changeActiveValue}
+    solution={props.solution} 
+    activeSquare={activeSquare} 
+    number={rowIndex} 
+    selectedIndex={selectedIndex} 
+    content={row}/>
   })
 
   useEffect(() => {
@@ -122,7 +136,6 @@ function Board (props) {
   }, [props.board])
 
   function navigate(e) {
-    console.log(e.target.id);
     if(e.keyCode === 39 && selectedIndex < 81){
       document.getElementById(selectedIndex + 1).focus();
       setSelected(selectedIndex + 1);
@@ -131,11 +144,11 @@ function Board (props) {
       document.getElementById(selectedIndex - 1).focus();
       setSelected(selectedIndex - 1);
     }
-    else if(e.keyCode === 38 && (selectedIndex - 9) > 1){
+    else if(e.keyCode === 38 && (selectedIndex - 9) > 0){
       document.getElementById(selectedIndex - 9).focus();
       setSelected(selectedIndex - 9);
     }
-    else if(e.keyCode === 40 && (selectedIndex + 9) < 81){
+    else if(e.keyCode === 40 && (selectedIndex + 9) < 82){
       document.getElementById(selectedIndex + 9).focus();
       setSelected(selectedIndex + 9);
     }
